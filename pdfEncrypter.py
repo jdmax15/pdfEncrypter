@@ -5,6 +5,7 @@
 import sys
 import os
 import PyPDF2
+import send2trash
 from pathlib import Path
 
 # Handle CLI Args (filepath and password)
@@ -25,18 +26,33 @@ print(f'Filepath: {filepath}\nPassword: {password}')
 print('Searching for .pdf files...')
 
 # Walk through given filepath and subfolders:
-
 for folderName, _, filenames in os.walk(filepath):
     for filename in filenames:
         if filename.endswith('.pdf'):
-            print(f'Encrypting: {os.path.join(folderName, filename)}')
+            absPath = os.path.join(folderName, filename)
+            print(filename)
+            print(f'Encrypting: {absPath}')
     
-            # Open .pdf file
+            # Open .pdf file and reader/writer objects.
+            pdfFile = open(absPath, 'rb')
+            pdfReader = PyPDF2.PdfFileReader(pdfFile)
+            pdfWriter = PyPDF2.PdfFileWriter()
+
+            # Read and add pages pdfWriter
+            for pageNum in range(pdfReader.numPages):
+                pdfWriter.addPage(pdfReader.getPage(pageNum))
 
             # Add encryption
+            pdfWriter.encrypt(password)
 
             # Save as 'originalfilename_encrypted.pdf'
+            resultPdf = open(f'{filename.split('.')[0]}_encrypted.pdf', 'wb')
+            pdfWriter.write(resultPdf)
+            resultPdf.close()
+            pdfFile.close()
 
             # Delete original .pdf.
+            os.unlink(absPath)
 
             # Print actions.
+            print(f'{absPath} was encrypted.')
