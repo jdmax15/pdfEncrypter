@@ -5,7 +5,6 @@
 import sys
 import os
 import PyPDF2
-import send2trash
 from pathlib import Path
 
 # Handle CLI Args (filepath and password)
